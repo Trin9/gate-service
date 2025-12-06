@@ -1,0 +1,30 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*/bin/
+bin/
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories (remove the comment if you use vendoring)
+vendor/
+
+# Build directories
+_build/
+build/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Go workspace file
+go.work
