@@ -9,6 +9,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # 复制整个项目代码
+COPY cmd ./cmd
 COPY . .
 
 RUN ls -l /app
