@@ -9,7 +9,6 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # 复制整个项目代码
-COPY cmd ./cmd
 COPY . .
 
 RUN ls -l /app
@@ -19,7 +18,7 @@ RUN ls -l /app
 # -ldflags "-s -w": 移除符号表和调试信息，进一步减小二进制文件体积
 # -o proxy：将输出文件命名为 'proxy'
 # ./cmd/server：假设这是你的 main 包路径
-RUN CGO_ENABLED=0 go build -a -ldflags "-s -w" -o gate-service ./cmd
+RUN CGO_ENABLED=0 go build -a -ldflags "-s -w" -o gate-service ./app/cmd
 
 # Stage 2: The Final (Runtime) Stage
 # 推荐使用 scratch 基础镜像，它几乎是空的，体积最小（约 5MB）
