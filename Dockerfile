@@ -11,6 +11,7 @@ RUN go mod download
 # 复制整个项目代码
 COPY . .
 
+RUN ls -l /app
 # 编译 Go 应用
 # CGO_ENABLED=0：禁用 CGO，确保生成的是静态链接的二进制文件
 # -a：强制重新构建依赖（确保干净构建）
