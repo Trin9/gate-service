@@ -22,6 +22,7 @@ func main() {
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	api.POST("/chat/completions", handler.ProxyHandler)
+	api.POST("/health", handler.HealthCheckHandler)
 
 	r.Run(":8080")
 }

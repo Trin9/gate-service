@@ -67,3 +67,14 @@ func ProxyHandler(c *gin.Context) {
 		c.Writer.Flush() // 关键！必须立即刷新缓冲区，否则前端看不到打字机效果
 	}
 }
+
+// HealthCheckHandler 专门用于处理 /health 请求
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+    // 设置响应头，通常返回 JSON 或纯文本
+    w.Header().Set("Content-Type", "text/plain")
+    w.WriteHeader(http.StatusOK) // 返回 HTTP 状态码 200 OK
+    
+    // 直接写入成功信息
+    fmt.Fprintf(w, "Status: OK")
+    log.Println("Health check accessed.")
+}
