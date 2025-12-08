@@ -68,13 +68,18 @@ func ProxyHandler(c *gin.Context) {
 	}
 }
 
-// HealthCheckHandler 专门用于处理 /health 请求
-func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-    // 设置响应头，通常返回 JSON 或纯文本
-    w.Header().Set("Content-Type", "text/plain")
-    w.WriteHeader(http.StatusOK) // 返回 HTTP 状态码 200 OK
+// 💡 修改 HealthCheckHandler 以接受 *gin.Context
+func HealthCheckHandler(c *gin.Context) { // 注意：参数现在是 c *gin.Context
+    // Gin 框架中，我们不再直接使用 w http.ResponseWriter 和 r *http.Request
+    // 而是通过 c.Writer 和 c.Request 来访问它们，但通常不需要直接操作它们。
+
+    // 使用 Gin 推荐的 c.String() 或 c.JSON() 方法来返回响应
+    // 这样它会自动设置状态码和响应头
+    c.String(http.StatusOK, "Status: OK") 
     
-    // 直接写入成功信息
-    fmt.Fprintf(w, "Status: OK")
+    // 如果想要返回 JSON:
+    // c.JSON(http.StatusOK, gin.H{"status": "ok"})
+    
     // log.Println("Health check accessed.")
+    // 注意：Gin 默认集成了 Logger 中间件，日志记录会更自动化
 }
