@@ -11,6 +11,8 @@ import (
 func main() {
 	r := gin.Default() // 自带 Logger 和 Recovery 中间件
 
+	r.GET("/health", handler.HealthCheckHandler)
+
 	// API 路由组
 	api := r.Group("/v1")
 	api.Use(middleware.AuthMiddleware())       // 挂载鉴权
@@ -20,9 +22,7 @@ func main() {
 	// --- 3. 暴露 /metrics 接口 ---
 	// Prometheus 会访问这个接口来“刮取”数据
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
-
 	api.POST("/chat/completions", handler.ProxyHandler)
-	api.POST("/health", handler.HealthCheckHandler)
 
 	r.Run(":8080")
 }
