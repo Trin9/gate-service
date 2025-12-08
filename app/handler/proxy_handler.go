@@ -76,5 +76,5 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
     
     // 直接写入成功信息
     fmt.Fprintf(w, "Status: OK")
-    log.Println("Health check accessed.")
+    // log.Println("Health check accessed.")
 }
