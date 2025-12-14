@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-vllm-pod
+spec:
+  containers:
+  - name: test-vllm
+    image: nginx:alpine # 先用一个小镜像测试调度
+    volumeMounts:
+    - mountPath: "/models"
+      name: models-volume
+  volumes:
+  - name: models-volume
+    persistentVolumeClaim:
+      claimName: model-pvc
+    # nodeSelector:
+    # 强制调度到你的特定GPU节点
+    # kubernetes.io/hostname: ip-192-168-39-72.ap-northeast-1.compute.internal
+  # 如果你的GPU节点有污点（Taint），可能需要添加容忍（toleration），我们先不加，看错误信息
