@@ -3,6 +3,7 @@ module gate-service
 go 1.24.11
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.11.0
 	github.com/prometheus/client_golang v1.19.1
 	golang.org/x/time v0.14.0
