@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-qwen-deployment
+  labels:
+    app: vllm-qwen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-qwen
+  template:
+    metadata:
+      labels:
+        app: vllm-qwen
+    spec:
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-pvc
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      containers:
+      - name: vllm-qwen
+        image: vllm/vllm-openai:latest
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: model-storage
+          mountPath: /mnt/qwen-models
+        - name: dshm
+          mountPath: /dev/shm
+        command: ["python3", "-m", "vllm.entrypoints.api_server"]
+        args:
+          - "--model"
+          - "/mnt/qwen-models/qwen/Qwen1.5-4B-Chat" # S3 路径
+          - "--tensor-parallel-size"
+          - "1"
+          - "--gpu-memory-utilization"
+          - "0.95"
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+          requests:
+            cpu: "2"
+            memory: "8Gi"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 10

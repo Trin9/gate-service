@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-qwen-deployment
+  labels:
+    app: vllm-qwen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-qwen
+  template:
+    metadata:
+      labels:
+        app: vllm-qwen
+    spec:
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-pvc
+      containers:
+      - name: vllm-qwen
+        image: python:3.9-slim
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: model-storage
+          mountPath: /mnt/qwen-models
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Checking model mount..."
+            ls -l /mnt/qwen-models/qwen/Qwen1.5-4B-Chat/config.json
+            pip install flask -q
+            cat <<EOF > app.py
+            from flask import Flask, Response, request
+            import time, json
+            app = Flask(__name__)
+            @app.route('/health', methods=['GET'])
+            def health(): return "OK", 200
+            @app.route('/v1/chat/completions', methods=['POST'])
+            def chat():
+                def generate():
+                    chunks = ["MOCK ", "Response ", "from ", "Local ", "K8s"]
+                    for chunk in chunks:
+                        data = {"choices": [{"index": 0, "delta": {"content": chunk}}]}
+                        yield f"data: {json.dumps(data)}\n\n"
+                        time.sleep(0.1)
+                    yield "data: [DONE]\n\n"
+                return Response(generate(), mimetype='text/event-stream')
+            if __name__ == '__main__': app.run(host='0.0.0.0', port=8000)
+            EOF
+            python app.py
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: "" # 留空，由具体 PV 决定
+  resources:
+    requests:
+      storage: 100Gi

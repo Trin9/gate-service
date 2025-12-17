@@ -1,0 +1,44 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: llm-inference-cluster
+  region: ap-northeast-1
+  version: "1.29"
+
+iam:
+  withOIDC: true
+
+addons:
+  - name: aws-fsx-csi-driver
+    version: latest
+
+nodeGroups:
+  # 1. Gate Service 节点 (降级为 t3.medium 以省钱)
+  - name: cpu-ng
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 3
+    # 允许 Spot 实例进一步省钱 (可选)
+    spot: true
+
+  # 2. LLM GPU 节点
+  - name: gpu-ng
+    instanceType: g4dn.xlarge
+    desiredCapacity: 1
+    minSize: 0
+    maxSize: 2
+    # ⚠️ 必须锁定 AZ 以匹配 FSx
+    availabilityZones: ["ap-northeast-1d"]
+    labels: {nvidia.com/gpu: "true"}
+    
+    # 自动挂载 FSx 权限
+    iam:
+      withAddonPolicies:
+        fsx: true
+    
+    # 防止普通 Pod 占用 GPU 节点
+    taints:
+      - key: "nvidia.com/gpu"
+        value: "true"
+        effect: "NoSchedule"
