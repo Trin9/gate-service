@@ -16,13 +16,13 @@ spec:
     spec:
       containers:
       - name: gate
-        image: your-docker-id/gate-service:latest # ⚠️ 修改这里
-        imagePullPolicy: IfNotPresent
+        image: trin9/gate-service:latest # ⚠️ 修改这里
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
         - name: VLLM_URL
-          value: "http://vllm-qwen-service:8000/v1/chat/completions"
+          value: "http://vllm-qwen-service.default.svc.cluster.local:8000/v1/chat/completions"
         resources:
           limits:
             cpu: "200m"
@@ -42,4 +42,4 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
-  type: LoadBalancer # 本地用 tunnel，AWS 自动创建 ELB
+  type: ClusterIP   # 本地用 tunnel，AWS 自动创建 ELB
