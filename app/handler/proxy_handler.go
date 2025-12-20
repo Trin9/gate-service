@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +45,15 @@ func ProxyHandler(c *gin.Context) {
 
 	// D. 处理响应
 	// 设置流式响应头
-	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	contentType := resp.Header.Get("Content-Type")
+	c.Writer.Header().Set("Content-Type", contentType)
+
+	// 如果是流，才设置 Connection: keep-alive
+	if strings.Contains(contentType, "event-stream") {
+		c.Writer.Header().Set("Connection", "keep-alive")
+		c.Writer.Header().Set("Transfer-Encoding", "chunked")
+	}
+
 	c.Writer.Header().Set("Cache-Control", "no-cache")
 	c.Writer.Header().Set("Connection", "keep-alive")
 	c.Writer.Header().Set("Transfer-Encoding", "chunked")
