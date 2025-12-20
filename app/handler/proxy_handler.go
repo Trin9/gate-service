@@ -11,10 +11,10 @@ import (
 )
 
 // --- 配置 ---
-const (
-	vllmURL   = "http://localhost:8000/v1/chat/completions" // vLLM 地址
-	jwtSecret = "your-secret-key"
-)
+// const (
+// 	vllmURL   = "http://localhost:8000/v1/chat/completions" // vLLM 地址
+// 	jwtSecret = "your-secret-key"
+// )
 
 func ProxyHandler(c *gin.Context) {
 	// A. 读取客户端请求体
@@ -23,9 +23,10 @@ func ProxyHandler(c *gin.Context) {
 
 	// B. 构建发往 vLLM 的请求
 	// 重点：使用 c.Request.Context()，这样客户端断开时，vLLM 请求也会被 Cancel
-	proxyReq, err := http.NewRequestWithContext(c.Request.Context(), "POST", vllmURL, bytes.NewBuffer(bodyBytes))
+	proxyReq, err := http.NewRequestWithContext(c.Request.Context(), "POST", GetVllmURL(), bytes.NewBuffer(bodyBytes))
 	if err != nil {
-		c.JSON(500, gin.H{"error": "Failed to create request"})
+		fmt.Printf("🔥 CRITICAL ERROR: %v\n", err)
+		c.JSON(500, gin.H{"error": "Upstream error", "details": err.Error()})
 		return
 	}
 	proxyReq.Header.Set("Content-Type", "application/json")
@@ -70,16 +71,16 @@ func ProxyHandler(c *gin.Context) {
 
 // 💡 修改 HealthCheckHandler 以接受 *gin.Context
 func HealthCheckHandler(c *gin.Context) { // 注意：参数现在是 c *gin.Context
-    // Gin 框架中，我们不再直接使用 w http.ResponseWriter 和 r *http.Request
-    // 而是通过 c.Writer 和 c.Request 来访问它们，但通常不需要直接操作它们。
+	// Gin 框架中，我们不再直接使用 w http.ResponseWriter 和 r *http.Request
+	// 而是通过 c.Writer 和 c.Request 来访问它们，但通常不需要直接操作它们。
 
-    // 使用 Gin 推荐的 c.String() 或 c.JSON() 方法来返回响应
-    // 这样它会自动设置状态码和响应头
-    c.String(http.StatusOK, "Status: OK") 
-    
-    // 如果想要返回 JSON:
-    // c.JSON(http.StatusOK, gin.H{"status": "ok"})
-    
-    // log.Println("Health check accessed.")
-    // 注意：Gin 默认集成了 Logger 中间件，日志记录会更自动化
+	// 使用 Gin 推荐的 c.String() 或 c.JSON() 方法来返回响应
+	// 这样它会自动设置状态码和响应头
+	c.String(http.StatusOK, "Status: OK")
+
+	// 如果想要返回 JSON:
+	// c.JSON(http.StatusOK, gin.H{"status": "ok"})
+
+	// log.Println("Health check accessed.")
+	// 注意：Gin 默认集成了 Logger 中间件，日志记录会更自动化
 }
