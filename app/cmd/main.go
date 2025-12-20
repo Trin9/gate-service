@@ -31,5 +31,5 @@ func main() {
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	api.POST("/chat/completions", handler.ProxyHandler)
 
-	r.Run(":8081")
+	r.Run(":8080")
 }
